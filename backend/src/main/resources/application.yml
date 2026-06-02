@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+app:
+  # Lokal PaddleOCR HTTP servisi (paddleocr-service/)
+  paddleocr:
+    base-url: http://localhost:8866
+    connect-timeout-ms: 5000
+    read-timeout-ms: 120000
+
+  # Lokal Ollama — hafif model onerilir (qwen3.6 ~24GB RAM, cok yavas)
+  # ollama pull qwen2.5:3b  sonra: export OLLAMA_MODEL=qwen2.5:3b
+  ollama:
+    base-url: http://localhost:11434
+    model: ${OLLAMA_MODEL:qwen2.5-coder:7b}
+    max-text-chars: 5000
+    max-tokens: 1024
+    connect-timeout-ms: 5000
+    read-timeout-ms: 300000
+
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:3000
