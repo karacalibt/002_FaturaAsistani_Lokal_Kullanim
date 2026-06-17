@@ -37,7 +37,7 @@ COPY --from=build /app/paddleocr-service ./paddleocr-service
 COPY --from=build /app/scripts ./scripts
 
 # Uygulamanın çalışacağı port
-EXPOSE 3001
+EXPOSE 8080
 
 # Spring Boot uygulamasını başlatma komutu
 CMD ["java", "-jar", "app.jar"]
