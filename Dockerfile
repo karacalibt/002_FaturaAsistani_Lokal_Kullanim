@@ -41,6 +41,7 @@ EXPOSE 3001
 
 # Spring Boot'a 3001 portunda çalışmasını emrediyoruz
 ENV SERVER_PORT=3001
+ENV SERVER_ADDRESS=0.0.0.0
 
 # Spring Boot uygulamasını başlatma komutu
 CMD ["java", "-jar", "app.jar"]
