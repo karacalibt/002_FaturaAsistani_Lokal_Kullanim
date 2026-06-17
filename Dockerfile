@@ -1,8 +1,8 @@
-# 1. Java ve Maven ortamı için base image
+# 1. Aşama: Maven ile Java projesini derleme
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# 2. Sistem bağımlılıklarını (Node.js, Python, Tesseract) yükleyelim
+# Sistem bağımlılıklarını (Python ve Tesseract) yükleyelim
 RUN apt-get update && apt-get install -y \
     curl \
     python3 \
@@ -11,18 +11,33 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr-tur \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Node.js 18+ Kurulumu
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
-
-# 4. Proje dosyalarını içeri aktaralım
+# Proje dosyalarını kopyala
 COPY . .
 
-# 5. Bağımlılıkları yükleme
-RUN npm install --prefix backend || true
+# Maven ile backend projesini build edip JAR dosyasını üretelim
+RUN mvn -f backend/pom.xml clean package -DskipTests
 
-# 6. Uygulamanın çalışacağı port
+# 2. Aşama: Çalışma ortamı
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# Çalışma ortamına da Tesseract ve Python bağımlılıklarını ekleyelim
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    tesseract-ocr \
+    tesseract-ocr-tur \
+    && rm -rf /var/lib/apt/lists/*
+
+# İlk aşamada üretilen JAR dosyasını buraya alalım
+# Not: pom.xml içindeki artifactId ve versiyona göre oluşan jar ismini kopyalıyoruz.
+# Eğer jar ismi tam uyuşmazsa target klasörünün altındaki isme göre revize edilebilir.
+COPY --from=build /app/backend/target/*.jar app.jar
+COPY --from=build /app/paddleocr-service ./paddleocr-service
+COPY --from=build /app/scripts ./scripts
+
+# Uygulamanın çalışacağı port
 EXPOSE 3001
 
-# 7. Uygulamayı başlatma komutu 
-CMD ["npm", "start", "--prefix", "backend"]
+# Spring Boot uygulamasını başlatma komutu
+CMD ["java", "-jar", "app.jar"]
