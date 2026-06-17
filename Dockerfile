@@ -36,8 +36,11 @@ COPY --from=build /app/backend/target/*.jar app.jar
 COPY --from=build /app/paddleocr-service ./paddleocr-service
 COPY --from=build /app/scripts ./scripts
 
-# Uygulamanın çalışacağı port
-EXPOSE 8080
+# Uygulamanın çalışacağı port (Belge amaçlı)
+EXPOSE 3001
+
+# Spring Boot'a 3001 portunda çalışmasını emrediyoruz
+ENV SERVER_PORT=3001
 
 # Spring Boot uygulamasını başlatma komutu
 CMD ["java", "-jar", "app.jar"]
